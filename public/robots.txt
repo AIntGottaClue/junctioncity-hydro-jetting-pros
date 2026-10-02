@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://junctioncityhydrojetting.prosapp.site/sitemap.xml
