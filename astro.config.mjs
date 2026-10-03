@@ -1,6 +1,1 @@
-import { defineConfig } from 'astro/config';
-export default defineConfig({
-  site: 'https://junctioncityhydrojetting.prosapp.site',
-  trailingSlash: 'always',
-  build: { format: 'directory' }
-});
+import {defineConfig} from 'astro/config';export default defineConfig({site:'https://junctioncityhydrojetting.prosapp.site',base:process.env.SITE_BASE || '/',trailingSlash:'always',build:{format:'directory'}});
