@@ -66,3 +66,9 @@ if(slug!=='index')schema['@graph'].push({'@type':'BreadcrumbList','@id':pageUrl+
 <style is:global>
 @media(max-width:639px){main>section:first-child>div.relative{padding-top:32px!important;padding-bottom:40px!important}.satellite-call{bottom:12px!important;right:12px!important;padding:11px 16px!important}}
 </style>
+
+<style is:global>
+header .sat-desktop-nav summary,.sat-mobile-panel summary { list-style:none; cursor:pointer; }
+header .sat-desktop-nav summary::-webkit-details-marker,.sat-mobile-panel summary::-webkit-details-marker { display:none; }
+header .sat-desktop-nav summary::after,.sat-mobile-panel summary::after { content:""; display:inline-block; margin-left:6px; width:6px; height:6px; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor; transform:rotate(45deg) translateY(-2px); }
+</style>
