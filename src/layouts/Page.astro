@@ -68,6 +68,15 @@ if(slug!=='index')schema['@graph'].push({'@type':'BreadcrumbList','@id':pageUrl+
 </style>
 
 <style is:global>
+/* Mobile menu: hamburger/X icons (no box). */
+header [data-mobile-menu]{border:0!important;background:none!important;box-shadow:none!important;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+@media(min-width:1024px){header [data-mobile-menu]{display:none}}
+[data-mobile-menu] .mobile-menu-x{display:none}
+[data-mobile-menu][aria-expanded="true"] .mobile-menu-hamburger{display:none}
+[data-mobile-menu][aria-expanded="true"] .mobile-menu-x{display:block}
+header:has([data-mobile-menu][aria-expanded="true"]){z-index:2001}
+</style>
+<style is:global>
 header .sat-desktop-nav summary,.sat-mobile-panel summary { list-style:none; cursor:pointer; }
 header .sat-desktop-nav summary::-webkit-details-marker,.sat-mobile-panel summary::-webkit-details-marker { display:none; }
 header .sat-desktop-nav summary::after,.sat-mobile-panel summary::after { content:""; display:inline-block; margin-left:6px; width:6px; height:6px; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor; transform:rotate(45deg) translateY(-2px); }
