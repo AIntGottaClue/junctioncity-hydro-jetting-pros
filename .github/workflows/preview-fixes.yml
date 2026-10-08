@@ -1,0 +1,74 @@
+name: Publish preview-only fixes
+on:
+  push:
+    branches: [preview-fixes]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: preview-fixes-pages
+  cancel-in-progress: false
+jobs:
+  preview:
+    if: github.ref == 'refs/heads/preview-fixes'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: preview-fixes
+          fetch-depth: 0
+      - name: Apply audited preview source patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/preview-fixes.patch <<'PATCH'
+          diff --git a/src/layouts/Page.astro b/src/layouts/Page.astro
+          index e4898f6..777da9d 100644
+          --- a/src/layouts/Page.astro
+          +++ b/src/layouts/Page.astro
+          @@ -25,6 +25,15 @@ if(slug==='index'){
+               body=body.replace(/<\/section>(?=\s*<section|\s*<\/main>)/,(m)=>m+'<section class="new-content-section" id="contact"><h2>Request a call</h2>'+stdForm(formId,pageLoc(''))+'</section>');
+             }
+           }
+          +
+          +// Make the four service cards full-card links while keeping their existing markup.
+          +const serviceCardRoutes = {'Grease &amp; Soap Buildup':'severe-grease-and-sludge','Tree Root Intrusion':'tree-root-intrusions','Scale &amp; Mineral Deposits':'mineral-and-scale-deposits','Recurring Slow Drains':'recurring-clogs-and-slow-drains'};
+          +body = body.replace(/<article\b[^>]*>[\s\S]*?<\/article>/g, card => {
+          +  const title = card.match(/<h3[^>]*>(.*?)<\/h3>/)?.[1];
+          +  const route = title && serviceCardRoutes[title];
+          +  if (!route || /<a\s/.test(card)) return card;
+          +  return card.replace(/^<article/, '<a href="'+base+route+'/" style="color:inherit;text-decoration:none"').replace(/<\/article>$/, '</a>');
+          +});
+           const strip=(s)=>s.replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&#39;|&#x27;/g,"'").replace(/&quot;/g,'"').replace(/\s+/g,' ').trim();
+           const mainHtml=body.slice(body.indexOf('</header>'));
+           const faqPairs=[];
+          PATCH
+          if git apply --check /tmp/preview-fixes.patch; then
+            git apply /tmp/preview-fixes.patch
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add src
+            git commit -m 'Remove preview image disclaimers and update service cards'
+            git push origin HEAD:preview-fixes
+          elif git apply --reverse --check /tmp/preview-fixes.patch; then
+            echo 'Preview source patch already applied.'
+          else
+            echo 'Preview patch no longer matches source. Review required.' >&2
+            exit 1
+          fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          BASE: /junctioncity-hydro-jetting-pros
+          SITE_BASE: /junctioncity-hydro-jetting-pros
+      - name: Publish only GitHub Pages preview
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages
+          force_orphan: true
